@@ -29,27 +29,27 @@ curl -fsSL -o /tmp/key.asc https://raw.githubusercontent.com/mozilla/sops/master
 export SOPS_IMPORT_PGP="$(cat /tmp/key.asc)"
 export SOPS_PGP_FP="FBC7B9E2A4F9289AC0C1D4843D16CEE4A27381B4"
 
-./tools/gate/00_setup.sh
+time ./tools/gate/00_setup.sh
 
 sudo usermod -a -G docker $USER
 
-./tools/gate/10_build_gate.sh
-read -p Press any key to continue the backup.
+time ./tools/gate/10_build_gate.sh
+read -p "Press any key to continue the backup."
 
-./tools/deployment/22_test_configs.sh
-read -p Press any key to continue the backup.
+time ./tools/deployment/22_test_configs.sh
+read -p "Press any key to continue the backup."
 
-./tools/deployment/23_pull_documents.sh
-read -p Press any key to continue the backup.
+time ./tools/deployment/23_pull_documents.sh
+read -p "Press any key to continue the backup."
 
-./tools/deployment/23_generate_secrets.sh
-read -p Press any key to continue the backup.
+time ./tools/deployment/23_generate_secrets.sh
+read -p "Press any key to continue the backup."
 
-./tools/deployment/24_build_images.sh
-read -p Press any key to continue the backup.
+time ./tools/deployment/24_build_images.sh
+read -p "Press any key to continue the backup."
 
-./tools/deployment/25_deploy_gating.sh
-read -p Press any key to continue the backup.
+time ./tools/deployment/25_deploy_gating.sh
+read -p "Press any key to continue the backup."
 
 
 
