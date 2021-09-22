@@ -34,22 +34,22 @@ time ./tools/gate/00_setup.sh
 sudo usermod -a -G docker $USER
 
 time ./tools/gate/10_build_gate.sh
-read -p "Press any key to continue the backup."
+read -p "Press any key to continue."
 
 time ./tools/deployment/22_test_configs.sh
-read -p "Press any key to continue the backup."
+read -p "Press any key to continue."
 
 time ./tools/deployment/23_pull_documents.sh
-read -p "Press any key to continue the backup."
+read -p "Press any key to continue."
 
 time ./tools/deployment/23_generate_secrets.sh
-read -p "Press any key to continue the backup."
+read -p "Press any key to continue."
 
 time ./tools/deployment/24_build_images.sh
-read -p "Press any key to continue the backup."
+read -p "Press any key to continue."
 
 time ./tools/deployment/25_deploy_gating.sh
-read -p "Press any key to continue the backup."
+read -p "Press any key to continue."
 
 
 
