@@ -83,9 +83,13 @@ install_kubectl_repo(){
 ##  Start Main
 ######################################
 
-check_resource_mem
-check_resource_disk
-check_resource_cpu
+SKIP_CHECKS=TRUE
+if [[ ! SKIP_CHECKS ]]; then
+    check_resource_mem
+    check_resource_disk
+    check_resource_cpu
+fi
+
 install_go
 install_kubectl_repo
 
