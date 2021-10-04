@@ -129,6 +129,7 @@ read -p "Press any key to continue."
 echo "======================================================================================"
 echo "==  Pull documents                                                                  =="
 echo "======================================================================================"
+sudo chmod 777 /tmp/airship/
 time ./tools/deployment/23_pull_documents.sh
 read -p "Press any key to continue."
 
