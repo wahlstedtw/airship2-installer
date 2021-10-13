@@ -130,6 +130,12 @@ sudo usermod -a -G docker $USER
     touch /tmp/airship2-installer-user-reload
     echo " exit shell and re-run installer to add user to docker group."
 read -p "Press any key to continue."
+else
+  echo Previous install detected. Skip initialization.
+  read -p "Press any key to continue."
+  cd ../airshipctl
+  import_test_encryption_keys
+fi
 
 echo "======================================================================================"
 echo "==  Build Gate - KVM server: 'virsh list --all' should show 3 images                =="
@@ -138,11 +144,6 @@ echo "==========================================================================
 time ./tools/gate/10_build_gate.sh
 #read -p "Press any key to continue."
 
-else
-  echo Previous install detected. Skip initialization.
-  cd ../airshipctl
-  import_test_encryption_keys
-fi
 
 echo "======================================================================================"
 echo "==  Generate test configs                                                                =="
