@@ -153,7 +153,7 @@ time ./tools/deployment/22_test_configs.sh
 echo "======================================================================================"
 echo "==  Pull documents                                                                  =="
 echo "======================================================================================"
-sudo rm -rf /tmp/airship/
+sudo chmod 777 /tmp/airship/
 time ./tools/deployment/23_pull_documents.sh
 #read -p "Press any key to continue."
 
