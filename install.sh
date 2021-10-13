@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
-set -xe
+set -e
 
 GO_VERS="1.17.1"
+PATCH_SET=""
 
 check_resource_mem() {
     memory="$(grep MemTotal /proc/meminfo | awk '{print $2}')"
@@ -79,9 +80,10 @@ install_kubectl_repo(){
     sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
     echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 }
-######################################
-##  Start Main
-######################################
+
+echo "######################################"
+echo "##  Start Main                      ##"
+echo "######################################"
 
 SKIP_CHECKS=TRUE
 if [[ ! SKIP_CHECKS ]]; then
@@ -89,6 +91,12 @@ if [[ ! SKIP_CHECKS ]]; then
     check_resource_disk
     check_resource_cpu
 fi
+
+if [[ ! -f /tmp/airship2-installer-user-reload ]]; then
+
+echo "######################################"
+echo "##  Initial Run                     ##"
+echo "######################################"
 
 install_go
 install_kubectl_repo
@@ -99,7 +107,14 @@ sudo apt-get install -y git-all kubectl
 cd ..
 
 if [[ ! -d airshipctl ]]; then
-    git clone https://opendev.org/airship/airshipctl.git
+    if [[ ! $PATCH_SET ]]; then
+	echo "Clone default airshipctl"
+        git clone https://opendev.org/airship/airshipctl.git
+    else
+        echo "Don't clone anything, fail"
+    fi	
+else
+    echo "Use existing airshipctl clone"
 fi
 
 cd airshipctl
@@ -112,48 +127,66 @@ echo "==========================================================================
 time ./tools/gate/00_setup.sh
 
 sudo usermod -a -G docker $USER
+    touch /tmp/airship2-installer-user-reload
+    echo " exit shell and re-run installer to add user to docker group."
+read -p "Press any key to continue."
 
 echo "======================================================================================"
 echo "==  Build Gate - KVM server: 'virsh list --all' should show 3 images                =="
 echo "==  air-ephemeral, air-target-1, air-worker1                                        =="
 echo "======================================================================================"
 time ./tools/gate/10_build_gate.sh
-read -p "Press any key to continue."
+#read -p "Press any key to continue."
+
+else
+  echo Previous install detected. Skip initialization.
+  cd ../airshipctl
+  import_test_encryption_keys
+fi
 
 echo "======================================================================================"
 echo "==  Generate test configs                                                                =="
 echo "======================================================================================"
 time ./tools/deployment/22_test_configs.sh
-read -p "Press any key to continue."
+#read -p "Press any key to continue."
 
 echo "======================================================================================"
 echo "==  Pull documents                                                                  =="
 echo "======================================================================================"
+sudo rm -rf /tmp/airship/
 time ./tools/deployment/23_pull_documents.sh
-read -p "Press any key to continue."
+#read -p "Press any key to continue."
 
 
+if [[ ! -f /tmp/airship2-installer-user-reload2 ]]; then
+	touch /tmp/airship2-installer-user-reload2
 echo "======================================================================================"
 echo "==  Generate Secrets                                                                =="
 echo "======================================================================================"
 time ./tools/deployment/23_generate_secrets.sh
-read -p "Press any key to continue."
+#read -p "Press any key to continue."
 
 
 echo "======================================================================================"
 echo "==  Build Images                                                                    =="
 echo "======================================================================================"
 time ./tools/deployment/24_build_images.sh
-read -p "Press any key to continue."
+#read -p "Press any key to continue."
 
 
 echo "======================================================================================"
 echo "==  This might take a while to deploy gating, potentially hours.                    =="
 echo "==  Message: '# Retrying to reach the apiserver'                                    =="
 echo "======================================================================================"
-time ./tools/deployment/25_deploy_gating.sh
-read -p "Press any key to continue."
-
+	time airshipctl phase apply remotedirect-ephemeral
+	cp ../airship2-installer/plan.yaml manifests/type/gating/phases/plan.yaml
+	time ./tools/deployment/25_deploy_gating.sh
+else
+	echo "Start after initinfra-ephemeral phase"
+	kubectl --kubeconfig ~/.airship/kubeconfig --context ephemeral-cluster get pods --all-namespaces
+	cp ../airship2-installer/plan2.yaml manifests/type/gating/phases/plan.yaml
+	time ./tools/deployment/25_deploy_gating.sh
+fi
 echo ""
 echo "======================================================================================"
 echo "==                                                                                  =="
